@@ -9,60 +9,65 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".LoginActivity">
 
-    <TextView
-        android:id="@+id/emailTextView"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="30dp"
-        android:text="@string/email"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/emailTextView"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:id="@+id/passwordTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/email"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="30dp"
-        android:text="@string/password"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/passwordTextView"
-        android:layout_alignEnd="@+id/email"
-        android:layout_alignParentStart="true" />
-
-    <!-- BOTÕES -->
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/password"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="0dp"
-        android:numColumns="2">
-
-        <Button
-            android:id="@+id/btn_signIn"
-            android:layout_width="169dp"
+        android:layout_marginTop="170dp">
+        <TextView
+            android:id="@+id/emailTextView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_row="0"
-            android:layout_column="1"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:layout_marginTop="30dp"
-            android:text="@string/signIn" />
-    </GridLayout>
+            android:text="@string/email"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/emailTextView"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:id="@+id/passwordTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/email"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="30dp"
+            android:text="@string/password"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/passwordTextView"
+            android:layout_alignEnd="@+id/email"
+            android:layout_alignParentStart="true" />
+
+        <!-- BOTÕES -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/password"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="0dp"
+            android:numColumns="2">
+
+            <Button
+                android:id="@+id/btn_signIn"
+                android:layout_width="169dp"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:layout_marginTop="30dp"
+                android:onClick="signin"
+                android:text="@string/signIn" />
+        </GridLayout>
+    </RelativeLayout>
 </RelativeLayout>

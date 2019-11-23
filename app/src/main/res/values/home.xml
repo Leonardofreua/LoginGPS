@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="forceCoordinates">Pegar Coordenadas Atuais</string>
+    <string name="showReport">Exibir Relatório</string>
+</resources>

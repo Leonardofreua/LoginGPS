@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/menu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="2"
+    tools:context=".HomeActivity">
+
+    <Button
+        android:id="@+id/forceCoordinates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="0"
+        android:layout_column="0"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="151dp"
+        android:onClick="getCoordinates"
+        android:text="@string/forceCoordinates" />
+
+    <Button
+        android:id="@+id/showReport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="0"
+        android:layout_column="1"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="151dp"
+        android:onClick="showReport"
+        android:text="@string/showReport" />
+
+</GridLayout>
