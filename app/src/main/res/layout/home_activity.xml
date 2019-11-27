@@ -28,6 +28,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginTop="151dp"
         android:onClick="showReport"
-        android:text="@string/showReport" />
+        android:text="@string/showReport"
+        android:layout_marginLeft="5dp" />
 
 </GridLayout>
