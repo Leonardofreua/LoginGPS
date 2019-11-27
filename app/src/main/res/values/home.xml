@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="forceCoordinates">Pegar Coordenadas Atuais</string>
-    <string name="showReport">Exibir Relatório</string>
+    <string name="forceCoordinates">Get current coordinates</string>
+    <string name="showReport">Show report</string>
+    <string name="signOut">Sign Out</string>
 </resources>

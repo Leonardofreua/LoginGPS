@@ -1,34 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/menu"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnCount="2"
     tools:context=".HomeActivity">
 
-    <Button
-        android:id="@+id/forceCoordinates"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/display_name"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_row="0"
-        android:layout_column="0"
-        android:layout_marginStart="15dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="151dp"
-        android:onClick="getCoordinates"
-        android:text="@string/forceCoordinates" />
+        android:layout_marginTop="50dp"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <Button
         android:id="@+id/showReport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_row="0"
-        android:layout_column="1"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="151dp"
+        android:layout_marginStart="120dp"
+        android:layout_marginLeft="120dp"
+        android:layout_marginTop="130dp"
         android:onClick="showReport"
-        android:text="@string/showReport"
-        android:layout_marginLeft="5dp" />
+        android:text="@string/showReport" />
 
-</GridLayout>
+    <Button
+        android:id="@+id/forceCoordinates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="220dp"
+        android:onClick="getCoordinates"
+        android:text="@string/forceCoordinates" />
+
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="140dp"
+        android:layout_marginLeft="140dp"
+        android:layout_marginTop="320dp"
+        android:onClick="signOut"
+        android:text="@string/signOut" />
+
+</RelativeLayout>
