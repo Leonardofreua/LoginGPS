@@ -48,6 +48,7 @@ import com.logingps.logingps.models.Coordinates;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -111,6 +112,10 @@ public class HomeActivity extends AppCompatActivity {
                                     requestNewLocationData();
                                 } else {
                                     setCoordinatesInformations(location);
+                                    latTextView.setText("Latitude: " + location.getLatitude());
+                                    lonTextView.setText("Longitutde: " + location.getLongitude());
+                                    latTextView.setVisibility(View.VISIBLE);
+                                    lonTextView.setVisibility(View.VISIBLE);
                                 }
                             }
                         }
@@ -128,10 +133,36 @@ public class HomeActivity extends AppCompatActivity {
     private void setCoordinatesInformations(Location location) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
 
-        latTextView.setText("Latitude: " + location.getLatitude());
-        lonTextView.setText("Longitutde: " + location.getLongitude());
-        latTextView.setVisibility(View.VISIBLE);
-        lonTextView.setVisibility(View.VISIBLE);
+        Date dateNow = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateNow);
+        Date currentDate = cal.getTime();
+
+        String timestamp = dateFormat.format(currentDate);
+
+        String coordinateId = UUID.randomUUID().toString();
+
+        Log.i("timestamp", timestamp);
+        Log.i("latitude", Double.toString(location.getLatitude()));
+        Log.i("longitude", Double.toString(location.getLongitude()));
+        Log.i("coordinate_ID", coordinateId);
+
+        coordinates.setId(coordinateId);
+        coordinates.setLatitude(Double.toString(location.getLatitude()));
+        coordinates.setLongitude(Double.toString(location.getLongitude()));
+        coordinates.setTimestamp(timestamp);
+
+        coordinatesRef.document(timestamp).set(coordinates).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(HomeActivity.this, "added", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(HomeActivity.this, "fail", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @SuppressLint("MissingPermission")
@@ -139,7 +170,7 @@ public class HomeActivity extends AppCompatActivity {
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setFastestInterval(30000);
         //mLocationRequest.setNumUpdates(1);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -153,6 +184,7 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             Location mLastLocation = locationResult.getLastLocation();
+            setCoordinatesInformations(mLastLocation);
             latTextView.setText("Latitude: " + mLastLocation.getLatitude());
             lonTextView.setText("Longitude: " + mLastLocation.getLongitude());
             latTextView.setVisibility(View.VISIBLE);
