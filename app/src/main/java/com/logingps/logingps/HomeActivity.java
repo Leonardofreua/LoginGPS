@@ -1,6 +1,7 @@
 package com.logingps.logingps;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -11,6 +12,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,11 +27,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -36,26 +43,28 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.logingps.logingps.models.Coordinates;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class HomeActivity extends AppCompatActivity implements LocationListener {
+public class HomeActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-
     private CollectionReference coordinatesRef = db.collection("coordinates");
 
-    TextView displayName;
+    private Coordinates coordinates = new Coordinates();
+
+    TextView displayName, latTextView, lonTextView;
     Button forceCoordinates;
 
     @VisibleForTesting
     private ProgressDialog mProgressDialog;
-    private LocationRequest mLocationRequest;
+    FusedLocationProviderClient mFusedLocationClient;
 
-    private static final int REQUEST_CHECK_SETTINGS = 613;
+    int PERMISSION_ID = 44;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,163 +72,140 @@ public class HomeActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.home_activity);
         setTitle("Home");
 
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        for(String provider : locationManager.getAllProviders()){
-            Toast.makeText(getApplicationContext(), provider, Toast.LENGTH_LONG).show();
-        }
-
         displayName = findViewById(R.id.display_name);
         forceCoordinates = findViewById(R.id.forceCoordinates);
-        createLocationRequest();
-    }
+        latTextView = findViewById(R.id.latTextView);
+        lonTextView = findViewById(R.id.lonTextView);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CHECK_SETTINGS) {
-            switch (resultCode) {
-                case Activity.RESULT_OK:
-                    Toast.makeText(this, "Location is now on", Toast.LENGTH_SHORT).show();
-                    break;
-                case Activity.RESULT_CANCELED:
-                    Toast.makeText(this, "User didn't allowed to change location settings", Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
+        getLastLocation();
+        requestNewLocationData();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(null, currentUser);
     }
 
-    public void getCoordinates(View view) {
-        askPermission();
-        askForLocationChange();
-        setUpService();
-    }
-
+    // TODO
     public void showReport(View view) {
 
     }
 
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(100000);
-        mLocationRequest.setFastestInterval(50000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    public void getLastLocation(View view) {
+        getLastLocation();
     }
 
-    private void askForLocationChange() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
-        SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-
-        task.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                Toast.makeText(HomeActivity.this, "Location is already on", Toast.LENGTH_SHORT).show();
+    @SuppressLint("MissingPermission")
+    private void getLastLocation() {
+        if (checkPermissions()) {
+            if (isLocationEnabled()) {
+                mFusedLocationClient.getLastLocation().addOnCompleteListener(
+                        new OnCompleteListener<Location>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Location> task) {
+                                Location location = task.getResult();
+                                if (location == null) {
+                                    requestNewLocationData();
+                                } else {
+                                    setCoordinatesInformations(location);
+                                }
+                            }
+                        }
+                );
+            } else {
+                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
             }
-        });
-
-        task.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    try {
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(HomeActivity.this, REQUEST_CHECK_SETTINGS);
-                    } catch (IntentSender.SendIntentException ignored) {
-                    }
-                }
-            }
-        });
-    }
-
-    private void askPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            Log.i("Permission", "Granted");
         } else {
-            setUpService();
+            requestPermissions();
         }
     }
 
-
-
-    public void setUpService() {
-        try {
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-            LocationListener locationListener = new LocationListener() {
-                public void onLocationChanged(Location location) {
-                    updateLocation(location);
-                }
-
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                }
-
-                public void onProviderEnabled(String provider) {
-                }
-
-                public void onProviderDisabled(String provider) {
-                }
-            };
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        } catch (SecurityException ex) {
-            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public void updateLocation(Location location) {
-        SimpleDateFormat dateFormatbra = new SimpleDateFormat("yyyy/MM/dd");
+    private void setCoordinatesInformations(Location location) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy-HH:mm:ss");
-        SimpleDateFormat dateFormat_hora = new SimpleDateFormat("HH:mm:ss");
-        SimpleDateFormat dateFormat_minutos = new SimpleDateFormat("mm");
-        SimpleDateFormat dateFormat_seg = new SimpleDateFormat("ss");
-        Date data = new Date();
 
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(data);
-        Date data_atual = cal.getTime();
+        latTextView.setText("Latitude: " + location.getLatitude());
+        lonTextView.setText("Longitutde: " + location.getLongitude());
+        latTextView.setVisibility(View.VISIBLE);
+        lonTextView.setVisibility(View.VISIBLE);
+    }
 
-        String data_completa = dateFormat.format(data_atual);
-        String hora_atual = dateFormat_hora.format(data_atual);
-        String min_atual = dateFormat_minutos.format(data_atual);
-        String segs = dateFormat_seg.format(data_atual);
-        String databra = dateFormatbra.format(data_atual);
+    @SuppressLint("MissingPermission")
+    private void requestNewLocationData() {
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        //mLocationRequest.setNumUpdates(1);
 
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient.requestLocationUpdates(
+                mLocationRequest, mLocationCallback,
+                Looper.myLooper()
+        );
+    }
 
-        Log.i("data_completa", data_completa);
-        Log.i("data_atual", data_atual.toString());
-        Log.i("hora_atual", hora_atual); // Esse é o que você quer
-
-
-        double latPoint = location.getLatitude();
-        double lngPoint = location.getLongitude();
-
-        String latitude = Double.toString(latPoint);
-        // Log.i("GPSLATITUDE:", latitude);
-        String longitude = Double.toString(lngPoint);
-        // Log.i("GPSLONGITUDE:", longitude);
-
-        String coordenadas = latitude + "#" + longitude;
-
-        int min = Integer.parseInt(String.valueOf(min_atual));
-        int ss = Integer.parseInt(String.valueOf(segs));
-        Log.i("GPSLONGITUDE:", segs);
-
-        if ((min % 2) == 0 && (ss == 59)) {
-            coordinatesRef.document(data_completa).set(coordenadas);
-            Log.i("GPSLONGITUDE:", coordenadas);
-            Log.i("GPSLONGITUDE:", data_completa);
+    private LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            Location mLastLocation = locationResult.getLastLocation();
+            latTextView.setText("Latitude: " + mLastLocation.getLatitude());
+            lonTextView.setText("Longitude: " + mLastLocation.getLongitude());
+            latTextView.setVisibility(View.VISIBLE);
+            lonTextView.setVisibility(View.VISIBLE);
         }
+    };
+
+    private boolean checkPermissions() {
+        return ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(
+                        this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_ID
+        );
+    }
+
+    private boolean isLocationEnabled() {
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager != null) {
+            return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+                    LocationManager.NETWORK_PROVIDER
+            );
+        }
+        return false;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_ID) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Location is now on", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (checkPermissions() && isLatAndLongVisible()) {
+            getLastLocation();
+        }
+    }
+
+    private boolean isLatAndLongVisible() {
+        return latTextView.getVisibility() == View.VISIBLE && lonTextView.getVisibility() == View.VISIBLE;
     }
 
     public void signOut(View view) {
@@ -241,25 +227,5 @@ public class HomeActivity extends AppCompatActivity implements LocationListener 
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
         }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        updateLocation(location);
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
     }
 }

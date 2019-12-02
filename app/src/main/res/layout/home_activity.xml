@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
         android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
         android:id="@+id/showReport"
@@ -31,7 +31,7 @@
         android:layout_marginStart="80dp"
         android:layout_marginLeft="60dp"
         android:layout_marginTop="220dp"
-        android:onClick="getCoordinates"
+        android:onClick="getLastLocation"
         android:text="@string/forceCoordinates" />
 
     <Button
@@ -43,5 +43,23 @@
         android:layout_marginTop="320dp"
         android:onClick="signOut"
         android:text="@string/signOut" />
+
+    <TextView
+        android:id="@+id/latTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="450dp"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/lonTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="470dp"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:visibility="invisible" />
 
 </RelativeLayout>
