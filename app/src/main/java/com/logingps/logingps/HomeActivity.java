@@ -90,9 +90,9 @@ public class HomeActivity extends AppCompatActivity {
         updateUI(null, currentUser);
     }
 
-    // TODO
     public void showReport(View view) {
-
+        Intent intent = new Intent(view.getContext(), ReportActivity.class);
+        startActivity(intent);
     }
 
     public void getLastLocation(View view) {
@@ -155,12 +155,12 @@ public class HomeActivity extends AppCompatActivity {
         coordinatesRef.document(timestamp).set(coordinates).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Toast.makeText(HomeActivity.this, "added", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(HomeActivity.this, "added", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(HomeActivity.this, "fail", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(HomeActivity.this, "fail", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LoginGPS</string>
+    <string name="back">Back</string>
 </resources>
