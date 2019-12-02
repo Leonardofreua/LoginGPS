@@ -60,6 +60,7 @@
 
         <!-- BOTÕES -->
         <GridLayout
+            android:id="@+id/grid_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/password"
@@ -80,5 +81,18 @@
                 android:onClick="signIn"
                 android:text="@string/signIn" />
         </GridLayout>
+
+
+        <TextView
+            android:id="@+id/components"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/grid_btn"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="60dp"
+            android:gravity="center"
+            android:text="@string/components"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
     </RelativeLayout>
 </RelativeLayout>
