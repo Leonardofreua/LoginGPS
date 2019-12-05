@@ -169,8 +169,8 @@ public class HomeActivity extends AppCompatActivity {
     private void requestNewLocationData() {
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(30000);
+        mLocationRequest.setInterval(100000);
+        mLocationRequest.setFastestInterval(50000);
         //mLocationRequest.setNumUpdates(1);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
